@@ -261,3 +261,219 @@ root@UbuntuTestVirt:~# zfs get compression otus
 NAME  PROPERTY     VALUE           SOURCE
 otus  compression  zle             local
 ```
+---
+<b>Работа со снэпшотами</b>  
+Копируем файл otus_task2.file из инета
+```
+root@UbuntuTestVirt:~# wget -O otus_task2.file --no-check-certificate https://drive.usercontent.google.com/download?id=1wgxjih8YZ-cqLqaZVa0lA3h3Y029c3oI&export=download
+[1] 29228
+root@UbuntuTestVirt:~# ll
+total 12476
+drwx------  5 root root    4096 июн  2 22:18 ./
+drwxr-xr-x 26 root root    4096 июн  2 21:50 ../
+-rw-r--r--  1 root root 7275140 дек  6  2023 archive.tar.gz
+-rw-------  1 root root    4749 мая 18 00:14 .bash_history
+-rw-r--r--  1 root root    3106 апр 22  2024 .bashrc
+-rw-------  1 root root     212 мая 30 00:57 .lesshst
+drwxr-xr-x  3 root root    4096 мар 14 01:48 .local/
+-rw-------  1 root root      15 мая 26 00:46 .lvm_history
+-rw-r--r--  1 root root 5432736 дек  6  2023 otus_task2.file
+-rw-r--r--  1 root root     161 апр 22  2024 .profile
+-rw-r--r--  1 root root     119 мая 16 17:13 raid_create.sh
+-rw-r--r--  1 root root     141 мая 18 00:14 raid_create.sh.save
+-rw-r--r--  1 root root      66 мар 25 23:58 .selected_editor
+drwx------  2 root root    4096 ноя  3  2024 .ssh/
+-rw-r--r--  1 root root    1570 июн  2 22:18 wget-log
+drwxr-xr-x  2 root root    4096 мая 15  2020 zpoolexport/
+```
+---
+Восстанавливает файловую сиситему из снэпшота otus_task2.file
+```
+root@UbuntuTestVirt:~# zfs list
+NAME             USED  AVAIL  REFER  MOUNTPOINT
+mypool          61.0M   771M    24K  /mypool
+mypool/zfs1     7.96M   771M  7.96M  /mypool/zfs1
+mypool/zfs2     21.0M   771M  21.0M  /mypool/zfs2
+mypool/zfs3     20.1M   771M  20.1M  /mypool/zfs3
+mypool/zfs4     11.7M   771M  11.7M  /mypool/zfs4
+otus            2.06M   350M    24K  /otus
+otus/hometask2  1.88M   350M  1.88M  /otus/hometask2
+root@UbuntuTestVirt:~# zfs receive otus/test@now < otus_task2.file
+root@UbuntuTestVirt:~# zfs list
+NAME             USED  AVAIL  REFER  MOUNTPOINT
+mypool          61.0M   771M    24K  /mypool
+mypool/zfs1     7.96M   771M  7.96M  /mypool/zfs1
+mypool/zfs2     21.0M   771M  21.0M  /mypool/zfs2
+mypool/zfs3     20.1M   771M  20.1M  /mypool/zfs3
+mypool/zfs4     11.7M   771M  11.7M  /mypool/zfs4
+otus            4.92M   347M    24K  /otus
+otus/hometask2  1.88M   347M  1.88M  /otus/hometask2
+otus/test       2.83M   347M  2.83M  /otus/test
+```
+---
+Ищем что-то секретное и читаем его содержимое
+```
+root@UbuntuTestVirt:~# find /otus/test -name "secret_message"
+/otus/test/task1/file_mess/secret_message
+root@UbuntuTestVirt:~# cat /otus/test/task1/file_mess/secret_message
+https://otus.ru/lessons/linux-hl/
+```
+---
+Находим рекламу курса otus :)
+
+---
+Для усвоения материала. Создание snapshot. Восстановление из snapshot.
+```
+root@UbuntuTestVirt:~# zpool list
+NAME     SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+mypool   960M  60.9M   899M        -         -     0%     6%  1.00x    ONLINE  -
+otus     480M  2.09M   478M        -         -     0%     0%  1.00x    ONLINE  -
+root@UbuntuTestVirt:~# ll /mypool/zfs1
+total 560
+drwxr-xr-x 10 root root     50 июн  1 22:34 ./
+drwxr-xr-x  6 root root      6 июн  1 22:19 ../
+-rw-r--r--  1 root root      0 июн  1 22:34 alternatives.log
+-rw-r--r--  1 root root   8879 июн  1 22:34 alternatives.log.1
+-rw-r--r--  1 root root   2519 июн  1 22:34 alternatives.log.2.gz
+-rw-r-----  1 root root      0 июн  1 22:34 apport.log
+drwxr-xr-x  2 root root     13 июн  1 22:34 apt/
+-rw-r-----  1 root root   1250 июн  1 22:34 auth.log
+-rw-r-----  1 root root  38839 июн  1 22:34 auth.log.1
+-rw-r-----  1 root root   4424 июн  1 22:34 auth.log.2.gz
+-rw-r-----  1 root root   2494 июн  1 22:34 auth.log.3.gz
+-rw-r-----  1 root root   1090 июн  1 22:34 auth.log.4.gz
+-rw-r--r--  1 root root  61229 июн  1 22:34 bootstrap.log
+-rw-r-----  1 root root      0 июн  1 22:34 btmp
+-rw-r-----  1 root root      0 июн  1 22:34 btmp.1
+-rw-r-----  1 root root  85170 июн  1 22:34 cloud-init.log
+-rw-r-----  1 root root   4592 июн  1 22:34 cloud-init-output.log
+drwxr-xr-x  2 root root      2 июн  1 22:34 dist-upgrade/
+-rw-r-----  1 root root  57444 июн  1 22:34 dmesg
+-rw-r-----  1 root root  58680 июн  1 22:34 dmesg.0
+-rw-r-----  1 root root  17266 июн  1 22:34 dmesg.1.gz
+-rw-r-----  1 root root  17053 июн  1 22:34 dmesg.2.gz
+-rw-r-----  1 root root  16990 июн  1 22:34 dmesg.3.gz
+-rw-r-----  1 root root  17336 июн  1 22:34 dmesg.4.gz
+-rw-r--r--  1 root root      0 июн  1 22:34 dpkg.log
+-rw-r--r--  1 root root  45043 июн  1 22:34 dpkg.log.1
+-rw-r--r--  1 root root   4443 июн  1 22:34 dpkg.log.2.gz
+-rw-r--r--  1 root root   1642 июн  1 22:34 dpkg.log.3.gz
+-rw-r--r--  1 root root  67810 июн  1 22:34 dpkg.log.4.gz
+-rw-r--r--  1 root root      0 июн  1 22:34 faillog
+drwxr-x---  4 root root     24 июн  1 22:34 installer/
+drwxr-xr-x  3 root root      3 июн  1 22:34 journal/
+-rw-r-----  1 root root    392 июн  1 22:34 kern.log
+-rw-r-----  1 root root  19196 июн  1 22:34 kern.log.1
+-rw-r-----  1 root root  17327 июн  1 22:34 kern.log.2.gz
+-rw-r-----  1 root root  58950 июн  1 22:34 kern.log.3.gz
+-rw-r-----  1 root root  14708 июн  1 22:34 kern.log.4.gz
+drwxr-xr-x  2 root root      3 июн  1 22:34 landscape/
+-rw-r--r--  1 root root 292292 июн  1 22:34 lastlog
+drwx------  2 root root      2 июн  1 22:34 private/
+lrwxrwxrwx  1 root root     39 июн  1 22:34 README -> ../../usr/share/doc/systemd/README.logs
+-rw-r-----  1 root root   8313 июн  1 22:34 syslog
+-rw-r-----  1 root root 166972 июн  1 22:34 syslog.1
+-rw-r-----  1 root root  42748 июн  1 22:34 syslog.2.gz
+-rw-r-----  1 root root 116554 июн  1 22:34 syslog.3.gz
+-rw-r-----  1 root root  32725 июн  1 22:34 syslog.4.gz
+drwxr-xr-x  2 root root     19 июн  1 22:34 sysstat/
+-rw-r--r--  1 root root      0 июн  1 22:34 ubuntu-advantage-apt-hook.log
+drwxr-x---  2 root root     13 июн  1 22:34 unattended-upgrades/
+-rw-r--r--  1 root root  67584 июн  1 22:34 wtmp
+root@UbuntuTestVirt:~# zfs snapshot mypool/zfs1@20250602
+root@UbuntuTestVirt:~# zfs list -t snapshot
+NAME                   USED  AVAIL  REFER  MOUNTPOINT
+mypool/zfs1@20250602     0B      -  7.96M  -
+root@UbuntuTestVirt:~# rm /mypool/zfs1/*.gz
+root@UbuntuTestVirt:~# ll /mypool/zfs1
+total 122
+drwxr-xr-x 10 root root     33 июн  2 23:08 ./
+drwxr-xr-x  6 root root      6 июн  1 22:19 ../
+-rw-r--r--  1 root root      0 июн  1 22:34 alternatives.log
+-rw-r--r--  1 root root   8879 июн  1 22:34 alternatives.log.1
+-rw-r-----  1 root root      0 июн  1 22:34 apport.log
+drwxr-xr-x  2 root root     13 июн  1 22:34 apt/
+-rw-r-----  1 root root   1250 июн  1 22:34 auth.log
+-rw-r-----  1 root root  38839 июн  1 22:34 auth.log.1
+-rw-r--r--  1 root root  61229 июн  1 22:34 bootstrap.log
+-rw-r-----  1 root root      0 июн  1 22:34 btmp
+-rw-r-----  1 root root      0 июн  1 22:34 btmp.1
+-rw-r-----  1 root root  85170 июн  1 22:34 cloud-init.log
+-rw-r-----  1 root root   4592 июн  1 22:34 cloud-init-output.log
+drwxr-xr-x  2 root root      2 июн  1 22:34 dist-upgrade/
+-rw-r-----  1 root root  57444 июн  1 22:34 dmesg
+-rw-r-----  1 root root  58680 июн  1 22:34 dmesg.0
+-rw-r--r--  1 root root      0 июн  1 22:34 dpkg.log
+-rw-r--r--  1 root root  45043 июн  1 22:34 dpkg.log.1
+-rw-r--r--  1 root root      0 июн  1 22:34 faillog
+drwxr-x---  4 root root     24 июн  1 22:34 installer/
+drwxr-xr-x  3 root root      3 июн  1 22:34 journal/
+-rw-r-----  1 root root    392 июн  1 22:34 kern.log
+-rw-r-----  1 root root  19196 июн  1 22:34 kern.log.1
+drwxr-xr-x  2 root root      3 июн  1 22:34 landscape/
+-rw-r--r--  1 root root 292292 июн  1 22:34 lastlog
+drwx------  2 root root      2 июн  1 22:34 private/
+lrwxrwxrwx  1 root root     39 июн  1 22:34 README -> ../../usr/share/doc/systemd/README.logs
+-rw-r-----  1 root root   8313 июн  1 22:34 syslog
+-rw-r-----  1 root root 166972 июн  1 22:34 syslog.1
+drwxr-xr-x  2 root root     19 июн  1 22:34 sysstat/
+-rw-r--r--  1 root root      0 июн  1 22:34 ubuntu-advantage-apt-hook.log
+drwxr-x---  2 root root     13 июн  1 22:34 unattended-upgrades/
+-rw-r--r--  1 root root  67584 июн  1 22:34 wtmp
+root@UbuntuTestVirt:~# zfs list -t snapshot -r mypool/zfs1
+NAME                   USED  AVAIL  REFER  MOUNTPOINT
+mypool/zfs1@20250602   462K      -  7.96M  -
+root@UbuntuTestVirt:~# zfs rollback mypool/zfs1@20250602
+root@UbuntuTestVirt:~# ll /mypool/zfs1
+total 560
+drwxr-xr-x 10 root root     50 июн  1 22:34 ./
+drwxr-xr-x  6 root root      6 июн  1 22:19 ../
+-rw-r--r--  1 root root      0 июн  1 22:34 alternatives.log
+-rw-r--r--  1 root root   8879 июн  1 22:34 alternatives.log.1
+-rw-r--r--  1 root root   2519 июн  1 22:34 alternatives.log.2.gz
+-rw-r-----  1 root root      0 июн  1 22:34 apport.log
+drwxr-xr-x  2 root root     13 июн  1 22:34 apt/
+-rw-r-----  1 root root   1250 июн  1 22:34 auth.log
+-rw-r-----  1 root root  38839 июн  1 22:34 auth.log.1
+-rw-r-----  1 root root   4424 июн  1 22:34 auth.log.2.gz
+-rw-r-----  1 root root   2494 июн  1 22:34 auth.log.3.gz
+-rw-r-----  1 root root   1090 июн  1 22:34 auth.log.4.gz
+-rw-r--r--  1 root root  61229 июн  1 22:34 bootstrap.log
+-rw-r-----  1 root root      0 июн  1 22:34 btmp
+-rw-r-----  1 root root      0 июн  1 22:34 btmp.1
+-rw-r-----  1 root root  85170 июн  1 22:34 cloud-init.log
+-rw-r-----  1 root root   4592 июн  1 22:34 cloud-init-output.log
+drwxr-xr-x  2 root root      2 июн  1 22:34 dist-upgrade/
+-rw-r-----  1 root root  57444 июн  1 22:34 dmesg
+-rw-r-----  1 root root  58680 июн  1 22:34 dmesg.0
+-rw-r-----  1 root root  17266 июн  1 22:34 dmesg.1.gz
+-rw-r-----  1 root root  17053 июн  1 22:34 dmesg.2.gz
+-rw-r-----  1 root root  16990 июн  1 22:34 dmesg.3.gz
+-rw-r-----  1 root root  17336 июн  1 22:34 dmesg.4.gz
+-rw-r--r--  1 root root      0 июн  1 22:34 dpkg.log
+-rw-r--r--  1 root root  45043 июн  1 22:34 dpkg.log.1
+-rw-r--r--  1 root root   4443 июн  1 22:34 dpkg.log.2.gz
+-rw-r--r--  1 root root   1642 июн  1 22:34 dpkg.log.3.gz
+-rw-r--r--  1 root root  67810 июн  1 22:34 dpkg.log.4.gz
+-rw-r--r--  1 root root      0 июн  1 22:34 faillog
+drwxr-x---  4 root root     24 июн  1 22:34 installer/
+drwxr-xr-x  3 root root      3 июн  1 22:34 journal/
+-rw-r-----  1 root root    392 июн  1 22:34 kern.log
+-rw-r-----  1 root root  19196 июн  1 22:34 kern.log.1
+-rw-r-----  1 root root  17327 июн  1 22:34 kern.log.2.gz
+-rw-r-----  1 root root  58950 июн  1 22:34 kern.log.3.gz
+-rw-r-----  1 root root  14708 июн  1 22:34 kern.log.4.gz
+drwxr-xr-x  2 root root      3 июн  1 22:34 landscape/
+-rw-r--r--  1 root root 292292 июн  1 22:34 lastlog
+drwx------  2 root root      2 июн  1 22:34 private/
+lrwxrwxrwx  1 root root     39 июн  1 22:34 README -> ../../usr/share/doc/systemd/README.logs
+-rw-r-----  1 root root   8313 июн  1 22:34 syslog
+-rw-r-----  1 root root 166972 июн  1 22:34 syslog.1
+-rw-r-----  1 root root  42748 июн  1 22:34 syslog.2.gz
+-rw-r-----  1 root root 116554 июн  1 22:34 syslog.3.gz
+-rw-r-----  1 root root  32725 июн  1 22:34 syslog.4.gz
+drwxr-xr-x  2 root root     19 июн  1 22:34 sysstat/
+-rw-r--r--  1 root root      0 июн  1 22:34 ubuntu-advantage-apt-hook.log
+drwxr-x---  2 root root     13 июн  1 22:34 unattended-upgrades/
+-rw-r--r--  1 root root  67584 июн  1 22:34 wtmp
+```
