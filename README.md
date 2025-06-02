@@ -321,6 +321,8 @@ https://otus.ru/lessons/linux-hl/
 ---
 Находим рекламу курса otus :)
 
+![Screen](./Screenshot_1.png)
+
 ---
 Для усвоения материала. Создание snapshot. Восстановление из snapshot.
 ```
